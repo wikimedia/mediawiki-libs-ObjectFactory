@@ -1,0 +1,5 @@
+/coverage
+/doc
+/vendor
+/composer.lock
+/.idea

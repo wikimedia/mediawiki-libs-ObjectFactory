@@ -18,16 +18,20 @@
  * @file
  */
 
+namespace Wikimedia\Test;
+
+use Closure;
+use Wikimedia\ObjectFactory;
+use PHPUnit_Framework_TestCase;
+
 class ObjectFactoryTest extends PHPUnit_Framework_TestCase {
 
-	use MediaWikiCoversValidator;
-
 	/**
-	 * @covers ObjectFactory::getObjectFromSpec
+	 * @covers \Wikimedia\ObjectFactory::getObjectFromSpec
 	 */
 	public function testClosureExpansionDisabled() {
 		$obj = ObjectFactory::getObjectFromSpec( [
-			'class' => 'ObjectFactoryTestFixture',
+			'class' => ObjectFactoryTestFixture::class,
 			'args' => [
 				function () {
 					return 'wrapped';
@@ -41,20 +45,20 @@ class ObjectFactoryTest extends PHPUnit_Framework_TestCase {
 			],
 			'closure_expansion' => false,
 		] );
-		$this->assertInstanceOf( 'Closure', $obj->args[0] );
+		$this->assertInstanceOf( Closure::class, $obj->args[0] );
 		$this->assertSame( 'wrapped', $obj->args[0]() );
 		$this->assertSame( 'unwrapped', $obj->args[1] );
-		$this->assertInstanceOf( 'Closure', $obj->setterArgs[0] );
+		$this->assertInstanceOf( Closure::class, $obj->setterArgs[0] );
 		$this->assertSame( 'wrapped', $obj->setterArgs[0]() );
 	}
 
 	/**
-	 * @covers ObjectFactory::getObjectFromSpec
-	 * @covers ObjectFactory::expandClosures
+	 * @covers \Wikimedia\ObjectFactory::getObjectFromSpec
+	 * @covers \Wikimedia\ObjectFactory::expandClosures
 	 */
 	public function testClosureExpansionEnabled() {
 		$obj = ObjectFactory::getObjectFromSpec( [
-			'class' => 'ObjectFactoryTestFixture',
+			'class' => ObjectFactoryTestFixture::class,
 			'args' => [
 				function () {
 					return 'wrapped';
@@ -75,7 +79,7 @@ class ObjectFactoryTest extends PHPUnit_Framework_TestCase {
 		$this->assertSame( 'wrapped', $obj->setterArgs[0] );
 
 		$obj = ObjectFactory::getObjectFromSpec( [
-			'class' => 'ObjectFactoryTestFixture',
+			'class' => ObjectFactoryTestFixture::class,
 			'args' => [ function () {
 				return 'unwrapped';
 			}, ],
@@ -92,7 +96,7 @@ class ObjectFactoryTest extends PHPUnit_Framework_TestCase {
 	}
 
 	/**
-	 * @covers ObjectFactory::getObjectFromSpec
+	 * @covers \Wikimedia\ObjectFactory::getObjectFromSpec
 	 */
 	public function testGetObjectFromFactory() {
 		$args = [ 'a', 'b' ];
@@ -106,8 +110,8 @@ class ObjectFactoryTest extends PHPUnit_Framework_TestCase {
 	}
 
 	/**
-	 * @covers ObjectFactory::getObjectFromSpec
-	 * @expectedException InvalidArgumentException
+	 * @covers \Wikimedia\ObjectFactory::getObjectFromSpec
+	 * @expectedException \InvalidArgumentException
 	 */
 	public function testGetObjectFromInvalid() {
 		$args = [ 'a', 'b' ];
@@ -118,24 +122,24 @@ class ObjectFactoryTest extends PHPUnit_Framework_TestCase {
 	}
 
 	/**
-	 * @covers ObjectFactory::getObjectFromSpec
+	 * @covers \Wikimedia\ObjectFactory::getObjectFromSpec
 	 * @dataProvider provideConstructClassInstance
 	 */
 	public function testGetObjectFromClass( $args ) {
 		$obj = ObjectFactory::getObjectFromSpec( [
-			'class' => 'ObjectFactoryTestFixture',
+			'class' => ObjectFactoryTestFixture::class,
 			'args' => $args,
 		] );
 		$this->assertSame( $args, $obj->args );
 	}
 
 	/**
-	 * @covers ObjectFactory::constructClassInstance
+	 * @covers \Wikimedia\ObjectFactory::constructClassInstance
 	 * @dataProvider provideConstructClassInstance
 	 */
 	public function testConstructClassInstance( $args ) {
 		$obj = ObjectFactory::constructClassInstance(
-			'ObjectFactoryTestFixture', $args
+			ObjectFactoryTestFixture::class, $args
 		);
 		$this->assertSame( $args, $obj->args );
 	}
@@ -159,13 +163,13 @@ class ObjectFactoryTest extends PHPUnit_Framework_TestCase {
 	}
 
 	/**
-	 * @covers ObjectFactory::constructClassInstance
-	 * @expectedException InvalidArgumentException
+	 * @covers \Wikimedia\ObjectFactory::constructClassInstance
+	 * @expectedException \InvalidArgumentException
 	 */
 	public function testNamedArgs() {
 		$args = [ 'foo' => 1, 'bar' => 2, 'baz' => 3 ];
 		$obj = ObjectFactory::constructClassInstance(
-			'ObjectFactoryTestFixture', $args
+			ObjectFactoryTestFixture::class, $args
 		);
 	}
 }

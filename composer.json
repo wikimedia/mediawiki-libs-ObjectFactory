@@ -1,0 +1,37 @@
+{
+	"name": "wikimedia/object-factory",
+	"description": "Construct objects from configuration instructions",
+	"license": "GPL-2.0-or-later",
+	"homepage": "https://www.mediawiki.org/wiki/ObjectFactory",
+	"authors": [
+		{
+			"name": "Bryan Davis",
+			"email": "bdavis@wikimedia.org"
+		}
+	],
+	"autoload": {
+		"classmap": ["src/"]
+	},
+	"require": {
+		"php": ">=5.5.9"
+	},
+	"require-dev": {
+		"jakub-onderka/php-parallel-lint": "0.9.2",
+		"jakub-onderka/php-console-highlighter": "0.3.2",
+		"mediawiki/mediawiki-codesniffer": "15.0.0",
+		"mediawiki/minus-x": "0.2.1",
+		"phpunit/phpunit": "4.8.36"
+	},
+	"scripts": {
+		"test": [
+			"parallel-lint . --exclude vendor",
+			"phpunit",
+			"phpcs -sp",
+			"minus-x check ."
+		],
+		"fix": [
+			"phpcbf",
+			"minus-x fix ."
+		]
+	}
+}

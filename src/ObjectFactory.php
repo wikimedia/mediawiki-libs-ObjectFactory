@@ -18,6 +18,13 @@
  * @file
  */
 
+namespace Wikimedia;
+
+use Closure;
+use InvalidArgumentException;
+use ReflectionClass;
+use ReflectionException;
+
 /**
  * Construct objects from configuration instructions.
  *
