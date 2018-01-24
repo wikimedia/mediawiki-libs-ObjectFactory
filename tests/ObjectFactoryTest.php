@@ -173,14 +173,3 @@ class ObjectFactoryTest extends PHPUnit_Framework_TestCase {
 		);
 	}
 }
-
-class ObjectFactoryTestFixture {
-	public $args;
-	public $setterArgs;
-	public function __construct( /*...*/ ) {
-		$this->args = func_get_args();
-	}
-	public function setter( /*...*/ ) {
-		$this->setterArgs = func_get_args();
-	}
-}
