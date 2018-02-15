@@ -10,10 +10,14 @@
 		}
 	],
 	"autoload": {
-		"psr-4": { "Wikimedia\\": "src/" }
+		"psr-4": {
+			"Wikimedia\\": "src/"
+		}
 	},
 	"autoload-dev": {
-		"psr-4": { "Wikimedia\\Test\\": "tests/" }
+		"psr-4": {
+			"Wikimedia\\Test\\": "tests/"
+		}
 	},
 	"require": {
 		"php": ">=5.5.9"
@@ -21,7 +25,7 @@
 	"require-dev": {
 		"jakub-onderka/php-parallel-lint": "0.9.2",
 		"jakub-onderka/php-console-highlighter": "0.3.2",
-		"mediawiki/mediawiki-codesniffer": "15.0.0",
+		"mediawiki/mediawiki-codesniffer": "16.0.0",
 		"mediawiki/minus-x": "0.2.1",
 		"phpunit/phpunit": "4.8.36"
 	},
