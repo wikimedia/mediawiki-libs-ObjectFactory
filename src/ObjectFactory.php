@@ -22,7 +22,6 @@ namespace Wikimedia;
 
 use Closure;
 use InvalidArgumentException;
-use ReflectionClass;
 use ReflectionException;
 
 /**
@@ -119,16 +118,6 @@ class ObjectFactory {
 	/**
 	 * Construct an instance of the given class using the given arguments.
 	 *
-	 * PHP's `call_user_func_array()` doesn't work with object construction so
-	 * we have to use other measures. Starting with PHP 5.6.0 we could use the
-	 * "splat" operator (`...`) to unpack the array into an argument list.
-	 * Sadly there is no way to conditionally include a syntax construct like
-	 * a new operator in a way that allows older versions of PHP to still
-	 * parse the file. Instead, we will try a loop unrolling technique that
-	 * works for 0-10 arguments. If we are passed 11 or more arguments we will
-	 * take the performance penalty of using
-	 * `ReflectionClass::newInstanceArgs()` to construct the desired object.
-	 *
 	 * @param string $clazz Class name
 	 * @param array $args Constructor arguments
 	 * @return mixed Constructed instance
@@ -139,67 +128,6 @@ class ObjectFactory {
 			throw new InvalidArgumentException( __METHOD__ . ': $args cannot be an associative array' );
 		}
 
-		// TODO: when PHP min version supported is >=5.6.0 replace this
-		// with `return new $clazz( ... $args );`.
-		$obj = null;
-		switch ( count( $args ) ) {
-			case 0:
-				$obj = new $clazz();
-				break;
-			case 1:
-				$obj = new $clazz( $args[0] );
-				break;
-			case 2:
-				$obj = new $clazz( $args[0], $args[1] );
-				break;
-			case 3:
-				$obj = new $clazz( $args[0], $args[1], $args[2] );
-				break;
-			case 4:
-				$obj = new $clazz( $args[0], $args[1], $args[2], $args[3] );
-				break;
-			case 5:
-				$obj = new $clazz(
-					$args[0], $args[1], $args[2], $args[3], $args[4]
-				);
-				break;
-			case 6:
-				$obj = new $clazz(
-					$args[0], $args[1], $args[2], $args[3], $args[4],
-					$args[5]
-				);
-				break;
-			case 7:
-				$obj = new $clazz(
-					$args[0], $args[1], $args[2], $args[3], $args[4],
-					$args[5], $args[6]
-				);
-				break;
-			case 8:
-				$obj = new $clazz(
-					$args[0], $args[1], $args[2], $args[3], $args[4],
-					$args[5], $args[6], $args[7]
-				);
-				break;
-			case 9:
-				$obj = new $clazz(
-					$args[0], $args[1], $args[2], $args[3], $args[4],
-					$args[5], $args[6], $args[7], $args[8]
-				);
-				break;
-			case 10:
-				$obj = new $clazz(
-					$args[0], $args[1], $args[2], $args[3], $args[4],
-					$args[5], $args[6], $args[7], $args[8], $args[9]
-				);
-				break;
-			default:
-				// Fall back to using ReflectionClass and curse the developer
-				// who decided that 11+ args was a reasonable method
-				// signature.
-				$ref = new ReflectionClass( $clazz );
-				$obj = $ref->newInstanceArgs( $args );
-		}
-		return $obj;
+		return new $clazz( ...$args );
 	}
 }
