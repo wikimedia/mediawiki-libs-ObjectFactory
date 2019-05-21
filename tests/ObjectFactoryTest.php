@@ -21,13 +21,14 @@
 namespace Wikimedia\Test;
 
 use Closure;
+use Psr\Container\ContainerInterface;
 use Wikimedia\ObjectFactory;
 
+/**
+ * @covers \Wikimedia\ObjectFactory
+ */
 class ObjectFactoryTest extends \PHPUnit\Framework\TestCase {
 
-	/**
-	 * @covers \Wikimedia\ObjectFactory::getObjectFromSpec
-	 */
 	public function testClosureExpansionDisabled() {
 		$obj = ObjectFactory::getObjectFromSpec( [
 			'class' => ObjectFactoryTestFixture::class,
@@ -51,10 +52,6 @@ class ObjectFactoryTest extends \PHPUnit\Framework\TestCase {
 		$this->assertSame( 'wrapped', $obj->setterArgs[0]() );
 	}
 
-	/**
-	 * @covers \Wikimedia\ObjectFactory::getObjectFromSpec
-	 * @covers \Wikimedia\ObjectFactory::expandClosures
-	 */
 	public function testClosureExpansionEnabled() {
 		$obj = ObjectFactory::getObjectFromSpec( [
 			'class' => ObjectFactoryTestFixture::class,
@@ -94,9 +91,32 @@ class ObjectFactoryTest extends \PHPUnit\Framework\TestCase {
 		$this->assertSame( 'unwrapped', $obj->setterArgs[0] );
 	}
 
-	/**
-	 * @covers \Wikimedia\ObjectFactory::getObjectFromSpec
-	 */
+	public function testSpecIsArg() {
+		$spec = [
+			'class' => ObjectFactoryTestFixture::class,
+			'args' => [ 'a', 'b' ],
+			'spec_is_arg' => true,
+		];
+		$obj = ObjectFactory::getObjectFromSpec( $spec );
+		$this->assertSame( [ $spec ], $obj->args );
+
+		$opts = [ 'specIsArg' => true, 'extraArgs' => [ 'foo', 'bar' ] ];
+		$spec = [
+			'class' => ObjectFactoryTestFixture::class,
+			'args' => [ 'a', 'b' ],
+		];
+		$obj = ObjectFactory::getObjectFromSpec( $spec, $opts );
+		$this->assertSame( [ 'foo', 'bar', $spec + [ 'spec_is_arg' => true ] ], $obj->args );
+
+		$spec = [
+			'class' => ObjectFactoryTestFixture::class,
+			'args' => [ 'a', 'b' ],
+			'spec_is_arg' => false,
+		];
+		$obj = ObjectFactory::getObjectFromSpec( $spec, $opts );
+		$this->assertSame( [ 'foo', 'bar', 'a', 'b' ], $obj->args );
+	}
+
 	public function testGetObjectFromFactory() {
 		$args = [ 'a', 'b' ];
 		$obj = ObjectFactory::getObjectFromSpec( [
@@ -109,8 +129,8 @@ class ObjectFactoryTest extends \PHPUnit\Framework\TestCase {
 	}
 
 	/**
-	 * @covers \Wikimedia\ObjectFactory::getObjectFromSpec
 	 * @expectedException \InvalidArgumentException
+	 * @expectedExceptionMessage Provided specification lacks both 'factory' and 'class' parameters.
 	 */
 	public function testGetObjectFromInvalid() {
 		$args = [ 'a', 'b' ];
@@ -121,7 +141,6 @@ class ObjectFactoryTest extends \PHPUnit\Framework\TestCase {
 	}
 
 	/**
-	 * @covers \Wikimedia\ObjectFactory::getObjectFromSpec
 	 * @dataProvider provideConstructClassInstance
 	 */
 	public function testGetObjectFromClass( $args ) {
@@ -137,10 +156,16 @@ class ObjectFactoryTest extends \PHPUnit\Framework\TestCase {
 	 * @dataProvider provideConstructClassInstance
 	 */
 	public function testConstructClassInstance( $args ) {
-		$obj = ObjectFactory::constructClassInstance(
-			ObjectFactoryTestFixture::class, $args
-		);
-		$this->assertSame( $args, $obj->args );
+		$level = error_reporting();
+		error_reporting( $level & ~E_USER_DEPRECATED );
+		try {
+			$obj = ObjectFactory::constructClassInstance(
+				ObjectFactoryTestFixture::class, $args
+			);
+			$this->assertSame( $args, $obj->args );
+		} finally {
+			error_reporting( $level );
+		}
 	}
 
 	public static function provideConstructClassInstance() {
@@ -165,10 +190,152 @@ class ObjectFactoryTest extends \PHPUnit\Framework\TestCase {
 	 * @covers \Wikimedia\ObjectFactory::constructClassInstance
 	 * @expectedException \InvalidArgumentException
 	 */
+	public function testNamedArgs_old() {
+		$level = error_reporting();
+		error_reporting( $level & ~E_USER_DEPRECATED );
+		try {
+			$args = [ 'foo' => 1, 'bar' => 2, 'baz' => 3 ];
+			$obj = ObjectFactory::constructClassInstance(
+				ObjectFactoryTestFixture::class, $args
+			);
+		} finally {
+			error_reporting( $level );
+		}
+	}
+
+	/**
+	 * @expectedException \InvalidArgumentException
+	 * @expectedExceptionMessage 'args' cannot be an associative array
+	 */
 	public function testNamedArgs() {
 		$args = [ 'foo' => 1, 'bar' => 2, 'baz' => 3 ];
-		$obj = ObjectFactory::constructClassInstance(
-			ObjectFactoryTestFixture::class, $args
+		$obj = ObjectFactory::getObjectFromSpec( [
+			'class' => ObjectFactoryTestFixture::class,
+			'args' => $args,
+		] );
+	}
+
+	/**
+	 * @expectedException \UnexpectedValueException
+	 * @expectedExceptionMessage 'factory' did not return an object
+	 */
+	public function testNonObjectFactory() {
+		ObjectFactory::getObjectFromSpec( [
+			'factory' => function () {
+				return null;
+			},
+		] );
+	}
+
+	/**
+	 * @expectedException \UnexpectedValueException
+	 * @expectedExceptionMessage 'factory' was expected to return an instance of
+	 */
+	public function testWrongObjectFactory() {
+		ObjectFactory::getObjectFromSpec( [
+			'class' => ObjectFactoryTestFixture::class,
+			'factory' => function () {
+				return new \stdClass;
+			},
+		] );
+	}
+
+	public function testExtraArgs() {
+		$obj = ObjectFactory::getObjectFromSpec( [
+			'class' => ObjectFactoryTestFixture::class,
+			'args' => [ 'a', 'b' ],
+		], [ 'extraArgs' => [ 'foo', 'bar' ] ] );
+		$this->assertSame( [ 'foo', 'bar', 'a', 'b' ], $obj->args );
+	}
+
+	/**
+	 * @expectedException \UnexpectedValueException
+	 * @expectedExceptionMessage Expected instance of FooBar, got
+	 */
+	public function testAssertClass() {
+		// This one passes
+		ObjectFactory::getObjectFromSpec( [
+			'class' => ObjectFactoryTestFixture::class,
+		], [ 'assertClass' => ObjectFactoryTestFixture::class ] );
+
+		// This one fails
+		ObjectFactory::getObjectFromSpec( [
+			'class' => ObjectFactoryTestFixture::class,
+		], [ 'assertClass' => 'FooBar' ] );
+	}
+
+	/**
+	 * @expectedException \InvalidArgumentException
+	 * @expectedExceptionMessage Passing a raw class name is not allowed here
+	 */
+	public function testClassSpecNotAllowed() {
+		ObjectFactory::getObjectFromSpec(
+			ObjectFactoryTestFixture::class,
+			[ 'extraArgs' => [ 'foo', 'bar' ] ]
 		);
 	}
+
+	public function testClassSpecAllowed() {
+		$obj = ObjectFactory::getObjectFromSpec(
+			ObjectFactoryTestFixture::class,
+			[ 'allowClassName' => true, 'extraArgs' => [ 'foo', 'bar' ] ]
+		);
+		$this->assertSame( [ 'foo', 'bar' ], $obj->args );
+	}
+
+	/**
+	 * @expectedException \InvalidArgumentException
+	 * @expectedExceptionMessage Passing a raw callable is not allowed here
+	 */
+	public function testCallableSpecNotAllowed() {
+		ObjectFactory::getObjectFromSpec(
+			function ( ...$args ) {
+				return new ObjectFactoryTestFixture( ...$args );
+			},
+			[ 'extraArgs' => [ 'foo', 'bar' ] ]
+		);
+	}
+
+	public function testCallableSpecAllowed() {
+		$obj = ObjectFactory::getObjectFromSpec(
+			function ( ...$args ) {
+				return new ObjectFactoryTestFixture( ...$args );
+			},
+			[ 'allowCallable' => true, 'extraArgs' => [ 'foo', 'bar' ] ]
+		);
+		$this->assertSame( [ 'foo', 'bar' ], $obj->args );
+	}
+
+	/**
+	 * @expectedException \InvalidArgumentException
+	 * @expectedExceptionMessage Provided specification is not an array.
+	 */
+	public function testBadSpec() {
+		ObjectFactory::getObjectFromSpec(
+			'ThisDoesNotExist',
+			[ 'allowClassName' => true,  'allowCallable' => true ]
+		);
+	}
+
+	public function testNonStaticUse() {
+		$container = $this->getMockBuilder( ContainerInterface::class )
+			->getMockForAbstractClass();
+
+		// Can't mock a static method, but we can make an anonymous subclass overriding it.
+		$factory = new class ( $container ) extends ObjectFactory {
+			public static function getObjectFromSpec( $spec, array $options = [] ) {
+				$that = $options['that'];
+				$that->assertArrayHasKey( 'serviceContainer', $options );
+				$that->assertInstanceOf( ContainerInterface::class, $options['serviceContainer'] );
+				return parent::getObjectFromSpec( $spec, $options );
+			}
+		};
+
+		$obj = $factory->createObject( [
+			'class' => ObjectFactoryTestFixture::class,
+			'args' => [ 'a', 'b' ],
+		], [ 'that' => $this ] );
+		$this->assertSame( [ 'a', 'b' ], $obj->args );
+	}
+
 }

@@ -1,5 +1,12 @@
-/coverage
-/doc
+# Editors
+*~
+.*.swp
+/.idea
+
+# Composer
 /vendor
 /composer.lock
-/.idea
+
+# Building and testing
+/coverage
+/doc
