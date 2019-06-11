@@ -317,6 +317,75 @@ class ObjectFactoryTest extends \PHPUnit\Framework\TestCase {
 		);
 	}
 
+	public function testServices() {
+		$services = [
+			'Foo' => (object)[ 'foo' ],
+			'Bar' => (object)[ 'bar' ],
+			'Baz' => (object)[ 'baz' ],
+		];
+
+		$container = $this->getMockBuilder( ContainerInterface::class )
+			->setMethods( [ 'get' ] )
+			->getMockForAbstractClass();
+		$container->method( 'get' )->willReturnCallback( function ( $name ) use ( $services ) {
+			if ( isset( $services[$name] ) ) {
+				return $services[$name];
+			}
+			throw new \Exception( "Service $name not found" );
+		} );
+
+		// Basic usage
+		$obj = ObjectFactory::getObjectFromSpec(
+			[
+				'class' => ObjectFactoryTestFixture::class,
+				'services' => [ 'Foo' ],
+			],
+			[
+				'serviceContainer' => $container,
+			]
+		);
+		$this->assertSame( [ $services['Foo'] ], $obj->args );
+
+		// Ordering of argument sources
+		$obj = ObjectFactory::getObjectFromSpec(
+			[
+				'class' => ObjectFactoryTestFixture::class,
+				'args' => [ 'a', 'b' ],
+				'services' => [ 'Bar', 'Foo' ],
+			],
+			[
+				'extraArgs' => [ 'x', 'y' ],
+				'serviceContainer' => $container,
+			]
+		);
+		$this->assertSame( [ 'x', 'y', $services['Bar'], $services['Foo'], 'a', 'b' ], $obj->args );
+
+		// Repetition of a service
+		$spec = [
+			'factory' => function ( ...$args ) {
+				return new ObjectFactoryTestFixture( ...$args );
+			},
+			'spec_is_arg' => true,
+			'services' => [ 'Baz', 'Baz' ],
+		];
+		$obj = ObjectFactory::getObjectFromSpec( $spec, [
+			'extraArgs' => [ 'x', 'y' ],
+			'serviceContainer' => $container,
+		] );
+		$this->assertSame( [ 'x', 'y', $services['Baz'], $services['Baz'], $spec ], $obj->args );
+	}
+
+	/**
+	 * @expectedException \InvalidArgumentException
+	 * @expectedExceptionMessage 'services' cannot be used without a service container
+	 */
+	public function testServices_error() {
+		ObjectFactory::getObjectFromSpec( [
+			'class' => ObjectFactoryTestFixture::class,
+			'services' => [ 'foo', 'bar' ],
+		] );
+	}
+
 	public function testNonStaticUse() {
 		$container = $this->getMockBuilder( ContainerInterface::class )
 			->getMockForAbstractClass();
