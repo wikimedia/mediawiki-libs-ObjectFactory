@@ -42,7 +42,7 @@ use UnexpectedValueException;
  *     'args' => array,
  *     'closure_expansion' => bool, // default true
  *     'spec_is_arg' => bool, // default false
- *     'services' => string[], // default empty
+ *     'services' => (string|null)[], // default empty
  *
  * The 'args' key, if provided, specifies arguments to pass to the constructor/callable.
  * Values in 'args' which are Closure instances will be expanded by invoking
@@ -56,7 +56,8 @@ use UnexpectedValueException;
  *
  * If 'services' is supplied and non-empty (and a service container is available),
  * the named services are requested from the PSR-11 service container and
- * prepended before 'args'.
+ * prepended before 'args'. `null` values in 'services' are passed to the constructor
+ * unchanged.
  *
  * If any extra arguments are passed in the options to getObjectFromSpec() or
  * createObject(), these are prepended before the 'services' and 'args'.
@@ -105,8 +106,8 @@ class ObjectFactory {
 	/**
 	 * Instantiate an object based on a specification array.
 	 *
-	 * @param array|string|callable $spec Specification array, or (optionally)
-	 *  a class name or callable.
+	 * @param array|string|callable $spec Specification array (see class documentation),
+	 *  or (optionally) a class name or callable.
 	 * @param array $options Allowed keys are
 	 *  - 'allowClassName': (bool) If set and truthy, $spec may be a string class name.
 	 *    In this case, it will be treated as if it were `[ 'class' => $spec ]`.
@@ -158,7 +159,7 @@ class ObjectFactory {
 				throw new InvalidArgumentException( '\'services\' cannot be used without a service container' );
 			}
 			foreach ( $spec['services'] as $service ) {
-				$services[] = $container->get( $service );
+				$services[] = $service === null ? null : $container->get( $service );
 			}
 		}
 
