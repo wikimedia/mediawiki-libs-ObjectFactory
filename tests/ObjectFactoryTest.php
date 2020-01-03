@@ -128,13 +128,13 @@ class ObjectFactoryTest extends \PHPUnit\Framework\TestCase {
 		$this->assertSame( $args, $obj->args );
 	}
 
-	/**
-	 * @expectedException \InvalidArgumentException
-	 * @expectedExceptionMessage Provided specification lacks both 'factory' and 'class' parameters.
-	 */
 	public function testGetObjectFromInvalid() {
 		$args = [ 'a', 'b' ];
-		$obj = ObjectFactory::getObjectFromSpec( [
+		$this->expectException( \InvalidArgumentException::class );
+		$this->expectExceptionMessage(
+			'Provided specification lacks both \'factory\' and \'class\' parameters.'
+		);
+		ObjectFactory::getObjectFromSpec( [
 			// Missing 'class' or 'factory'
 			'args' => $args,
 		] );
@@ -188,14 +188,14 @@ class ObjectFactoryTest extends \PHPUnit\Framework\TestCase {
 
 	/**
 	 * @covers \Wikimedia\ObjectFactory::constructClassInstance
-	 * @expectedException \InvalidArgumentException
 	 */
 	public function testNamedArgs_old() {
 		$level = error_reporting();
 		error_reporting( $level & ~E_USER_DEPRECATED );
 		try {
 			$args = [ 'foo' => 1, 'bar' => 2, 'baz' => 3 ];
-			$obj = ObjectFactory::constructClassInstance(
+			$this->expectException( \InvalidArgumentException::class );
+			ObjectFactory::constructClassInstance(
 				ObjectFactoryTestFixture::class, $args
 			);
 		} finally {
@@ -203,23 +203,19 @@ class ObjectFactoryTest extends \PHPUnit\Framework\TestCase {
 		}
 	}
 
-	/**
-	 * @expectedException \InvalidArgumentException
-	 * @expectedExceptionMessage 'args' cannot be an associative array
-	 */
 	public function testNamedArgs() {
 		$args = [ 'foo' => 1, 'bar' => 2, 'baz' => 3 ];
-		$obj = ObjectFactory::getObjectFromSpec( [
+		$this->expectException( \InvalidArgumentException::class );
+		$this->expectExceptionMessage( '\'args\' cannot be an associative array' );
+		ObjectFactory::getObjectFromSpec( [
 			'class' => ObjectFactoryTestFixture::class,
 			'args' => $args,
 		] );
 	}
 
-	/**
-	 * @expectedException \UnexpectedValueException
-	 * @expectedExceptionMessage 'factory' did not return an object
-	 */
 	public function testNonObjectFactory() {
+		$this->expectException( \UnexpectedValueException::class );
+		$this->expectExceptionMessage( '\'factory\' did not return an object' );
 		ObjectFactory::getObjectFromSpec( [
 			'factory' => function () {
 				return null;
@@ -227,11 +223,9 @@ class ObjectFactoryTest extends \PHPUnit\Framework\TestCase {
 		] );
 	}
 
-	/**
-	 * @expectedException \UnexpectedValueException
-	 * @expectedExceptionMessage 'factory' was expected to return an instance of
-	 */
 	public function testWrongObjectFactory() {
+		$this->expectException( \UnexpectedValueException::class );
+		$this->expectExceptionMessage( '\'factory\' was expected to return an instance of' );
 		ObjectFactory::getObjectFromSpec( [
 			'class' => ObjectFactoryTestFixture::class,
 			'factory' => function () {
@@ -248,10 +242,6 @@ class ObjectFactoryTest extends \PHPUnit\Framework\TestCase {
 		$this->assertSame( [ 'foo', 'bar', 'a', 'b' ], $obj->args );
 	}
 
-	/**
-	 * @expectedException \UnexpectedValueException
-	 * @expectedExceptionMessage Expected instance of FooBar, got
-	 */
 	public function testAssertClass() {
 		// This one passes
 		ObjectFactory::getObjectFromSpec( [
@@ -259,16 +249,16 @@ class ObjectFactoryTest extends \PHPUnit\Framework\TestCase {
 		], [ 'assertClass' => ObjectFactoryTestFixture::class ] );
 
 		// This one fails
+		$this->expectException( \UnexpectedValueException::class );
+		$this->expectExceptionMessage( 'Expected instance of FooBar, got' );
 		ObjectFactory::getObjectFromSpec( [
 			'class' => ObjectFactoryTestFixture::class,
 		], [ 'assertClass' => 'FooBar' ] );
 	}
 
-	/**
-	 * @expectedException \InvalidArgumentException
-	 * @expectedExceptionMessage Passing a raw class name is not allowed here
-	 */
 	public function testClassSpecNotAllowed() {
+		$this->expectException( \InvalidArgumentException::class );
+		$this->expectExceptionMessage( 'Passing a raw class name is not allowed here' );
 		ObjectFactory::getObjectFromSpec(
 			ObjectFactoryTestFixture::class,
 			[ 'extraArgs' => [ 'foo', 'bar' ] ]
@@ -283,11 +273,9 @@ class ObjectFactoryTest extends \PHPUnit\Framework\TestCase {
 		$this->assertSame( [ 'foo', 'bar' ], $obj->args );
 	}
 
-	/**
-	 * @expectedException \InvalidArgumentException
-	 * @expectedExceptionMessage Passing a raw callable is not allowed here
-	 */
 	public function testCallableSpecNotAllowed() {
+		$this->expectException( \InvalidArgumentException::class );
+		$this->expectExceptionMessage( 'Passing a raw callable is not allowed here' );
 		ObjectFactory::getObjectFromSpec(
 			function ( ...$args ) {
 				return new ObjectFactoryTestFixture( ...$args );
@@ -306,11 +294,9 @@ class ObjectFactoryTest extends \PHPUnit\Framework\TestCase {
 		$this->assertSame( [ 'foo', 'bar' ], $obj->args );
 	}
 
-	/**
-	 * @expectedException \InvalidArgumentException
-	 * @expectedExceptionMessage Provided specification is not an array.
-	 */
 	public function testBadSpec() {
+		$this->expectException( \InvalidArgumentException::class );
+		$this->expectExceptionMessage( 'Provided specification is not an array.' );
 		ObjectFactory::getObjectFromSpec(
 			'ThisDoesNotExist',
 			[ 'allowClassName' => true,  'allowCallable' => true ]
@@ -375,11 +361,9 @@ class ObjectFactoryTest extends \PHPUnit\Framework\TestCase {
 		$this->assertSame( [ 'x', 'y', $services['Baz'], $services['Baz'], $spec ], $obj->args );
 	}
 
-	/**
-	 * @expectedException \InvalidArgumentException
-	 * @expectedExceptionMessage 'services' cannot be used without a service container
-	 */
 	public function testServices_error() {
+		$this->expectException( \InvalidArgumentException::class );
+		$this->expectExceptionMessage( '\'services\' cannot be used without a service container' );
 		ObjectFactory::getObjectFromSpec( [
 			'class' => ObjectFactoryTestFixture::class,
 			'services' => [ 'foo', 'bar' ],
