@@ -359,6 +359,18 @@ class ObjectFactoryTest extends \PHPUnit\Framework\TestCase {
 			'serviceContainer' => $container,
 		] );
 		$this->assertSame( [ 'x', 'y', $services['Baz'], $services['Baz'], $spec ], $obj->args );
+
+		// Optional service omitted
+		$obj = ObjectFactory::getObjectFromSpec(
+			[
+				'class' => ObjectFactoryTestFixture::class,
+				'services' => [ null, 'Foo', null, 'Bar' ],
+			],
+			[
+				'serviceContainer' => $container,
+			]
+		);
+		$this->assertSame( [ null, $services['Foo'], null, $services['Bar'] ], $obj->args );
 	}
 
 	public function testServices_error() {
