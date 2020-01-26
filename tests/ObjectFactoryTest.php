@@ -68,10 +68,10 @@ class ObjectFactoryTest extends \PHPUnit\Framework\TestCase {
 			],
 			'closure_expansion' => true,
 		] );
-		$this->assertInternalType( 'string', $obj->args[0] );
+		$this->assertIsString( $obj->args[0] );
 		$this->assertSame( 'wrapped', $obj->args[0] );
 		$this->assertSame( 'unwrapped', $obj->args[1] );
-		$this->assertInternalType( 'string', $obj->setterArgs[0] );
+		$this->assertIsString( $obj->setterArgs[0] );
 		$this->assertSame( 'wrapped', $obj->setterArgs[0] );
 
 		$obj = ObjectFactory::getObjectFromSpec( [
@@ -85,9 +85,9 @@ class ObjectFactoryTest extends \PHPUnit\Framework\TestCase {
 				}, ],
 			],
 		] );
-		$this->assertInternalType( 'string', $obj->args[0] );
+		$this->assertIsString( $obj->args[0] );
 		$this->assertSame( 'unwrapped', $obj->args[0] );
-		$this->assertInternalType( 'string', $obj->setterArgs[0] );
+		$this->assertIsString( $obj->setterArgs[0] );
 		$this->assertSame( 'unwrapped', $obj->setterArgs[0] );
 	}
 
