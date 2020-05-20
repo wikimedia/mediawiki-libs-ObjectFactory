@@ -64,7 +64,7 @@ $ composer require wikimedia/object-factory
 Usage
 -----
 
-```
+```php
 <?php
 
 $specs = [
