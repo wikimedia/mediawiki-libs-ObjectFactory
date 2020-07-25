@@ -93,10 +93,41 @@ class ObjectFactory {
 	 * This calls getObjectFromSpec(), with the ContainerInterface that was
 	 * passed to the constructor passed as `$options['serviceContainer']`.
 	 *
-	 * @param array|string|callable $spec As for getObjectFromSpec()
-	 * @param array $options As for getObjectFromSpec(). Note the value for
-	 *  'serviceContainer' is forced, so specifying it here will be ignored.
+	 * @param array|string|callable $spec Specification array, or (when the respective
+	 *   $options flag is set) a class name or callable. Allowed fields (see class
+	 *   documentation for more details):
+	 *   - 'class': (string) Class of the object to create. If 'factory' is also specified,
+	 *     it will be used to validate the object.
+	 *   - 'factory': (callable) Factory method for creating the object.
+	 *   - 'args': (array) Arguments to pass to the constructor or the factory method.
+	 *   - 'services': (array of string/null) List of services to pass as arguments. Each
+	 *     name will be looked up in the container given to ObjectFactory in its constructor,
+	 *     and the results prepended to the argument list. Null values are passed unchanged.
+	 *   - 'calls': (array) A list of calls to perform on the created object, for setter
+	 *     injection. Keys of the array are method names and values are argument lists
+	 *     (as arrays). These arguments are not affected by any of the other specification
+	 *     fields that manipulate constructor arguments.
+	 *   - 'closure_expansion': (bool, default true) Whether to expand (execute) closures
+	 *     in 'args'.
+	 *   - 'spec_is_arg': (bool, default false) When true, 'args' is ignored and the entire
+	 *     specification array is passed as an argument.
+	 *   One of 'class' and 'factory' is required.
+	 * @param array $options Allowed keys are
+	 *  - 'allowClassName': (bool) If set and truthy, $spec may be a string class name.
+	 *    In this case, it will be treated as if it were `[ 'class' => $spec ]`.
+	 *  - 'allowCallable': (bool) If set and truthy, $spec may be a callable. In this
+	 *    case, it will be treated as if it were `[ 'factory' => $spec ]`.
+	 *  - 'specIsArg': (bool) If set and truthy, default $spec['spec_is_arg'] = true
+	 *    if it is unset. This is mainly intended for backwards compatibility with existing
+	 *    code that uses a near-clone of ObjectFactory with those semantics.
+	 *  - 'extraArgs': (array) Extra arguments to pass to the constructor/callable. These
+	 *    will come before services and normal args.
+	 *  - 'assertClass': (string) Throw an UnexpectedValueException if the spec
+	 *    does not create an object of this class.
 	 * @return object
+	 * @throws InvalidArgumentException when object specification is not valid.
+	 * @throws UnexpectedValueException when the factory returns a non-object, or
+	 *  the object is not an instance of the specified class.
 	 */
 	public function createObject( $spec, array $options = [] ) {
 		$options['serviceContainer'] = $this->serviceContainer;
@@ -106,19 +137,8 @@ class ObjectFactory {
 	/**
 	 * Instantiate an object based on a specification array.
 	 *
-	 * @param array|string|callable $spec Specification array (see class documentation),
-	 *  or (optionally) a class name or callable.
-	 * @param array $options Allowed keys are
-	 *  - 'allowClassName': (bool) If set and truthy, $spec may be a string class name.
-	 *    In this case, it will be treated as if it were `[ 'class' => $spec ]`.
-	 *  - 'allowCallable': (bool) If set and truthy, $spec may be a callable. In this
-	 *    case, it will be treated as if it were `[ 'factory' => $spec ]`.
-	 *  - 'specIsArg': (bool) If set and truthy, default $spec['spec_is_arg'] = true
-	 *    if it is unset. This is mainly intended for backwards compatibility with existing
-	 *    code that uses a near-clone of ObjectFactory with those semantics.
-	 *  - 'extraArgs': (array) Extra arguments to pass to the constructor/callable.
-	 *  - 'assertClass': (string) Throw an UnexpectedValueException if the spec
-	 *    does not create an object of this class.
+	 * @param array|string|callable $spec As for createObject().
+	 * @param array $options As for createObject(). Additionally:
 	 *  - 'serviceContainer': (ContainerInterface) PSR-11 service container to use
 	 *    to handle 'services'.
 	 * @return object
