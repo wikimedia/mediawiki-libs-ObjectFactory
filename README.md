@@ -42,6 +42,9 @@ unchanged.
 
 If any extra arguments are passed in the options to getObjectFromSpec() or
 createObject(), these are prepended before the 'services' and 'args'.
+These are passed using the `extraArgs` key, and any Closure instances that
+are included this way are never expanded, regardless of whether the main
+argument list is expanded.
 
     'calls' => array
 
