@@ -144,7 +144,7 @@ class ObjectFactory {
 	 * @return object
 	 * @throws InvalidArgumentException when object specification is not valid.
 	 * @throws InvalidArgumentException when $spec['services'] is used without
-	 *  $options['serviceContainer'].
+	 *  $options['serviceContainer'] being and implementing ContainerInterface.
 	 * @throws UnexpectedValueException when the factory returns a non-object, or
 	 *  the object is not an instance of the specified class.
 	 */
