@@ -279,25 +279,4 @@ class ObjectFactory {
 		}, $list );
 	}
 
-	/**
-	 * Construct an instance of the given class using the given arguments.
-	 *
-	 * @deprecated Use PHP's splat operator, like `new $class( ...$args )`.
-	 * @param string $clazz Class name
-	 * @param array $args Constructor arguments
-	 * @return mixed Constructed instance
-	 */
-	public static function constructClassInstance( $clazz, $args ) {
-		trigger_error(
-			__METHOD__ . ' is deprecated, use `new $clazz( ...$args )` directly instead', E_USER_DEPRECATED
-		);
-
-		// $args should be a non-associative array; show nice error if that's not the case
-		if ( $args && array_keys( $args ) !== range( 0, count( $args ) - 1 ) ) {
-			throw new InvalidArgumentException( __METHOD__ . ': $args cannot be an associative array' );
-		}
-
-		return new $clazz( ...$args );
-	}
-
 }

@@ -141,6 +141,7 @@ class ObjectFactoryTest extends \PHPUnit\Framework\TestCase {
 	}
 
 	/**
+	 * @covers \Wikimedia\ObjectFactory::getObjectFromSpec
 	 * @dataProvider provideConstructClassInstance
 	 */
 	public function testGetObjectFromClass( $args ) {
@@ -149,23 +150,6 @@ class ObjectFactoryTest extends \PHPUnit\Framework\TestCase {
 			'args' => $args,
 		] );
 		$this->assertSame( $args, $obj->args );
-	}
-
-	/**
-	 * @covers \Wikimedia\ObjectFactory::constructClassInstance
-	 * @dataProvider provideConstructClassInstance
-	 */
-	public function testConstructClassInstance( $args ) {
-		$level = error_reporting();
-		error_reporting( $level & ~E_USER_DEPRECATED );
-		try {
-			$obj = ObjectFactory::constructClassInstance(
-				ObjectFactoryTestFixture::class, $args
-			);
-			$this->assertSame( $args, $obj->args );
-		} finally {
-			error_reporting( $level );
-		}
 	}
 
 	public static function provideConstructClassInstance() {
@@ -184,23 +168,6 @@ class ObjectFactoryTest extends \PHPUnit\Framework\TestCase {
 			'10 args' => [ [ 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, ] ],
 			'11 args' => [ [ 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, ] ],
 		];
-	}
-
-	/**
-	 * @covers \Wikimedia\ObjectFactory::constructClassInstance
-	 */
-	public function testNamedArgs_old() {
-		$level = error_reporting();
-		error_reporting( $level & ~E_USER_DEPRECATED );
-		try {
-			$args = [ 'foo' => 1, 'bar' => 2, 'baz' => 3 ];
-			$this->expectException( \InvalidArgumentException::class );
-			ObjectFactory::constructClassInstance(
-				ObjectFactoryTestFixture::class, $args
-			);
-		} finally {
-			error_reporting( $level );
-		}
 	}
 
 	public function testNamedArgs() {
