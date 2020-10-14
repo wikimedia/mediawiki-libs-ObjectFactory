@@ -277,14 +277,15 @@ class ObjectFactoryTest extends \PHPUnit\Framework\TestCase {
 			'Baz' => (object)[ 'baz' ],
 		];
 
-		$container = $this->getMockBuilder( ContainerInterface::class )
-			->setMethods( [ 'get' ] )
-			->getMockForAbstractClass();
+		$container = $this->createMock( ContainerInterface::class );
 		$container->method( 'get' )->willReturnCallback( function ( $name ) use ( $services ) {
 			if ( isset( $services[$name] ) ) {
 				return $services[$name];
 			}
 			throw new \Exception( "Service $name not found" );
+		} );
+		$container->method( 'has' )->willReturnCallback( function ( $name ) use ( $services ) {
+			return isset( $services[$name] );
 		} );
 
 		// Basic usage
@@ -327,7 +328,7 @@ class ObjectFactoryTest extends \PHPUnit\Framework\TestCase {
 		] );
 		$this->assertSame( [ 'x', 'y', $services['Baz'], $services['Baz'], $spec ], $obj->args );
 
-		// Optional service omitted
+		// Null service passed as null
 		$obj = ObjectFactory::getObjectFromSpec(
 			[
 				'class' => ObjectFactoryTestFixture::class,
@@ -338,15 +339,67 @@ class ObjectFactoryTest extends \PHPUnit\Framework\TestCase {
 			]
 		);
 		$this->assertSame( [ null, $services['Foo'], null, $services['Bar'] ], $obj->args );
+
+		// Optional services
+		$obj = ObjectFactory::getObjectFromSpec(
+			[
+				'class' => ObjectFactoryTestFixture::class,
+				'optional_services' => [ 'ServiceThatDoesNotExist', 'Foo' ]
+			],
+			[
+				'serviceContainer' => $container
+			]
+		);
+		$this->assertSame( [ null, $services['Foo'] ], $obj->args );
+
+		// Order of arguments with optional and non-optional services
+		$obj = ObjectFactory::getObjectFromSpec(
+			[
+				'class' => ObjectFactoryTestFixture::class,
+				'args' => [ 'param1', 'param2' ],
+				'services' => [ 'Bar', 'Foo' ],
+				'optional_services' => [ 'ServiceThatDoesNotExist', 'Foo' ],
+			],
+			[
+				'extraArgs' => [ 'extra1', 'extra2' ],
+				'serviceContainer' => $container,
+			]
+		);
+		$this->assertSame(
+			[
+				'extra1',
+				'extra2',
+				$services['Bar'],
+				$services['Foo'],
+				null,
+				$services['Foo'],
+				'param1',
+				'param2'
+			],
+			$obj->args
+		);
 	}
 
-	public function testServices_error() {
+	/**
+	 * @dataProvider provideTestMissingServiceContainer
+	 * @param string $type either 'services' or 'optional_services'
+	 */
+	public function testServices_error( $type ) {
 		$this->expectException( \InvalidArgumentException::class );
-		$this->expectExceptionMessage( '\'services\' cannot be used without a service container' );
-		ObjectFactory::getObjectFromSpec( [
-			'class' => ObjectFactoryTestFixture::class,
-			'services' => [ 'foo', 'bar' ],
-		] );
+		$this->expectExceptionMessage(
+			'\'services\' and \'optional_services\' cannot be used without a service container'
+		);
+
+		$spec = [ 'class' => ObjectFactoryTestFixure::class ];
+		$spec[ $type ] = [ 'foo', 'bar' ];
+		ObjectFactory::getObjectFromSpec( $spec );
+	}
+
+	public function provideTestMissingServiceContainer() {
+		return [
+			'Normal required services' => [ 'services' ],
+			'Optional services' => [ 'optional_services' ],
+		];
 	}
 
 	public function testNonStaticUse() {

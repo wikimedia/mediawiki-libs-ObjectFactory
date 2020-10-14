@@ -24,6 +24,7 @@ object is not an instance of the named class.
     'closure_expansion' => bool, // default true
     'spec_is_arg' => bool, // default false
     'services' => (string|null)[], // default empty
+    'optional_services' => (string|null)[], // default empty
 
 The 'args' key, if provided, specifies arguments to pass to the constructor/callable.
 Values in 'args' which are Closure instances will be expanded by invoking
@@ -39,6 +40,11 @@ If 'services' is supplied and non-empty (and a service container is available),
 the named services are requested from the PSR-11 service container and
 prepended before 'args'. `null` values in 'services' are passed to the constructor
 unchanged.
+
+Optional services declared via 'optional_services' are handled the same,
+except that if the service is not available from the service container
+`null` is passed as a parameter instead. Optional services are appended
+directly after the normal required services
 
 If any extra arguments are passed in the options to getObjectFromSpec() or
 createObject(), these are prepended before the 'services' and 'args'.

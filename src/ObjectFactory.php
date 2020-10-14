@@ -43,6 +43,7 @@ use UnexpectedValueException;
  *     'closure_expansion' => bool, // default true
  *     'spec_is_arg' => bool, // default false
  *     'services' => (string|null)[], // default empty
+ *     'optional_services' => (string|null)[], // default empty
  *
  * The 'args' key, if provided, specifies arguments to pass to the constructor/callable.
  * Values in 'args' which are Closure instances will be expanded by invoking
@@ -58,6 +59,11 @@ use UnexpectedValueException;
  * the named services are requested from the PSR-11 service container and
  * prepended before 'args'. `null` values in 'services' are passed to the constructor
  * unchanged.
+ *
+ * Optional services declared via 'optional_services' are handled the same,
+ * except that if the service is not available from the service container
+ * `null` is passed as a parameter instead. Optional services are appended
+ * directly after the normal required services.
  *
  * If any extra arguments are passed in the options to getObjectFromSpec() or
  * createObject(), these are prepended before the 'services' and 'args'.
@@ -103,6 +109,9 @@ class ObjectFactory {
 	 *   - 'services': (array of string/null) List of services to pass as arguments. Each
 	 *     name will be looked up in the container given to ObjectFactory in its constructor,
 	 *     and the results prepended to the argument list. Null values are passed unchanged.
+	 *   - 'optional_services': (array of string/null) Handled the same as services, but if
+	 *     the service is unavailable from the service container the parameter is set to 'null'
+	 *     instead of causing an error.
 	 *   - 'calls': (array) A list of calls to perform on the created object, for setter
 	 *     injection. Keys of the array are method names and values are argument lists
 	 *     (as arrays). These arguments are not affected by any of the other specification
@@ -143,8 +152,8 @@ class ObjectFactory {
 	 *    to handle 'services'.
 	 * @return object
 	 * @throws InvalidArgumentException when object specification is not valid.
-	 * @throws InvalidArgumentException when $spec['services'] is used without
-	 *  $options['serviceContainer'] being set and implementing ContainerInterface.
+	 * @throws InvalidArgumentException when $spec['services'] or $spec['optional_services']
+	 *  is used without $options['serviceContainer'] being set and implementing ContainerInterface.
 	 * @throws UnexpectedValueException when the factory returns a non-object, or
 	 *  the object is not an instance of the specified class.
 	 */
@@ -173,13 +182,29 @@ class ObjectFactory {
 		}
 
 		$services = [];
-		if ( !empty( $spec['services'] ) ) {
+		if ( !empty( $spec['services'] ) || !empty( $spec['optional_services'] ) ) {
 			$container = $options['serviceContainer'] ?? null;
 			if ( !$container instanceof ContainerInterface ) {
-				throw new InvalidArgumentException( '\'services\' cannot be used without a service container' );
+				throw new InvalidArgumentException(
+					'\'services\' and \'optional_services\' cannot be used without a service container'
+				);
 			}
-			foreach ( $spec['services'] as $service ) {
-				$services[] = $service === null ? null : $container->get( $service );
+
+			if ( !empty( $spec['services'] ) ) {
+				foreach ( $spec['services'] as $service ) {
+					$services[] = $service === null ? null : $container->get( $service );
+				}
+			}
+
+			if ( !empty( $spec['optional_services'] ) ) {
+				foreach ( $spec['optional_services'] as $service ) {
+					if ( $service !== null && $container->has( $service ) ) {
+						$services[] = $container->get( $service );
+					} else {
+						// Either $service was null, or the service was not available
+						$services[] = null;
+					}
+				}
 			}
 		}
 
