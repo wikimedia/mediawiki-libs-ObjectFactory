@@ -99,6 +99,13 @@ class ObjectFactory {
 	 * This calls getObjectFromSpec(), with the ContainerInterface that was
 	 * passed to the constructor passed as `$options['serviceContainer']`.
 	 *
+	 * @phan-template T
+	 * @codingStandardsIgnoreStart
+	 * @phan-param class-string<T>|callable(mixed ...$args):T|array{class?:class-string<T>,factory?:callable(mixed ...$args):T,args?:array,services?:array<string|null>,calls?:string[],closure_expansion?:bool,spec_is_arg?:bool} $spec
+	 * @phan-param array{allowClassName?:bool,allowCallable?:bool,specIsArg?:bool,extraArgs?:array,assertClass?:string} $options
+	 * @codingStandardsIgnoreEnd
+	 * @phan-return T|object
+	 *
 	 * @param array|string|callable $spec Specification array, or (when the respective
 	 *   $options flag is set) a class name or callable. Allowed fields (see class
 	 *   documentation for more details):
@@ -145,6 +152,13 @@ class ObjectFactory {
 
 	/**
 	 * Instantiate an object based on a specification array.
+	 *
+	 * @phan-template T
+	 * @codingStandardsIgnoreStart
+	 * @phan-param class-string<T>|callable(mixed ...$args):T|array{class?:class-string<T>,factory?:callable(mixed ...$args):T,args?:array,services?:array<string|null>,calls?:string[],closure_expansion?:bool,spec_is_arg?:bool} $spec
+	 * @phan-param array{allowClassName?:bool,allowCallable?:bool,specIsArg?:bool,extraArgs?:array,assertClass?:string,serviceContainer?:ContainerInterface} $options
+	 * @codingStandardsIgnoreEnd
+	 * @phan-return T|object
 	 *
 	 * @param array|string|callable $spec As for createObject().
 	 * @param array $options As for createObject(). Additionally:
