@@ -100,10 +100,10 @@ class ObjectFactory {
 	 * passed to the constructor passed as `$options['serviceContainer']`.
 	 *
 	 * @phan-template T
-	 * @codingStandardsIgnoreStart
+	 * @phpcs:disable Generic.Files.LineLength
 	 * @phan-param class-string<T>|callable(mixed ...$args):T|array{class?:class-string<T>,factory?:callable(mixed ...$args):T,args?:array,services?:array<string|null>,calls?:string[],closure_expansion?:bool,spec_is_arg?:bool} $spec
 	 * @phan-param array{allowClassName?:bool,allowCallable?:bool,specIsArg?:bool,extraArgs?:array,assertClass?:string} $options
-	 * @codingStandardsIgnoreEnd
+	 * @phpcs:enable
 	 * @phan-return T|object
 	 *
 	 * @param array|string|callable $spec Specification array, or (when the respective
@@ -154,10 +154,10 @@ class ObjectFactory {
 	 * Instantiate an object based on a specification array.
 	 *
 	 * @phan-template T
-	 * @codingStandardsIgnoreStart
+	 * @phpcs:disable Generic.Files.LineLength
 	 * @phan-param class-string<T>|callable(mixed ...$args):T|array{class?:class-string<T>,factory?:callable(mixed ...$args):T,args?:array,services?:array<string|null>,calls?:string[],closure_expansion?:bool,spec_is_arg?:bool} $spec
 	 * @phan-param array{allowClassName?:bool,allowCallable?:bool,specIsArg?:bool,extraArgs?:array,assertClass?:string,serviceContainer?:ContainerInterface} $options
-	 * @codingStandardsIgnoreEnd
+	 * @phpcs:enable
 	 * @phan-return T|object
 	 *
 	 * @param array|string|callable $spec As for createObject().
