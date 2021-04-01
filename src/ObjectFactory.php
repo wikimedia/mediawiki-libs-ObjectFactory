@@ -18,7 +18,7 @@
  * @file
  */
 
-namespace Wikimedia;
+namespace Wikimedia\ObjectFactory;
 
 use Closure;
 use InvalidArgumentException;
@@ -280,3 +280,8 @@ class ObjectFactory {
 	}
 
 }
+
+/**
+ * Renamed since 3.0.1
+ */
+class_alias( ObjectFactory::class, 'Wikimedia\ObjectFactory' );
