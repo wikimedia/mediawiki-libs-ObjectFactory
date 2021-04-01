@@ -18,7 +18,7 @@
  * @file
  */
 
-namespace Wikimedia\Test;
+namespace Wikimedia\ObjectFactory\Test;
 
 class ObjectFactoryTestFixture {
 	/**

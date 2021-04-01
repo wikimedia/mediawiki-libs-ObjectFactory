@@ -11,12 +11,13 @@
 	],
 	"autoload": {
 		"psr-4": {
+			"Wikimedia\\ObjectFactory\\": "src/",
 			"Wikimedia\\": "src/"
 		}
 	},
 	"autoload-dev": {
 		"psr-4": {
-			"Wikimedia\\Test\\": "tests/"
+			"Wikimedia\\ObjectFactory\\Test\\": "tests/"
 		}
 	},
 	"require": {

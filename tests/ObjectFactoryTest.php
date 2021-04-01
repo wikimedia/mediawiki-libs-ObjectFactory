@@ -18,16 +18,20 @@
  * @file
  */
 
-namespace Wikimedia\Test;
+namespace Wikimedia\ObjectFactory\Test;
 
 use Closure;
+use Exception;
+use InvalidArgumentException;
+use PHPUnit\Framework\TestCase;
 use Psr\Container\ContainerInterface;
-use Wikimedia\ObjectFactory;
+use UnexpectedValueException;
+use Wikimedia\ObjectFactory\ObjectFactory;
 
 /**
- * @covers \Wikimedia\ObjectFactory
+ * @covers \Wikimedia\ObjectFactory\ObjectFactory
  */
-class ObjectFactoryTest extends \PHPUnit\Framework\TestCase {
+class ObjectFactoryTest extends TestCase {
 
 	public function testClosureExpansionDisabled() {
 		$obj = ObjectFactory::getObjectFromSpec( [
@@ -130,7 +134,7 @@ class ObjectFactoryTest extends \PHPUnit\Framework\TestCase {
 
 	public function testGetObjectFromInvalid() {
 		$args = [ 'a', 'b' ];
-		$this->expectException( \InvalidArgumentException::class );
+		$this->expectException( InvalidArgumentException::class );
 		$this->expectExceptionMessage(
 			'Provided specification lacks both \'factory\' and \'class\' parameters.'
 		);
@@ -172,7 +176,7 @@ class ObjectFactoryTest extends \PHPUnit\Framework\TestCase {
 
 	public function testNamedArgs() {
 		$args = [ 'foo' => 1, 'bar' => 2, 'baz' => 3 ];
-		$this->expectException( \InvalidArgumentException::class );
+		$this->expectException( InvalidArgumentException::class );
 		$this->expectExceptionMessage( '\'args\' cannot be an associative array' );
 		ObjectFactory::getObjectFromSpec( [
 			'class' => ObjectFactoryTestFixture::class,
@@ -181,7 +185,7 @@ class ObjectFactoryTest extends \PHPUnit\Framework\TestCase {
 	}
 
 	public function testNonObjectFactory() {
-		$this->expectException( \UnexpectedValueException::class );
+		$this->expectException( UnexpectedValueException::class );
 		$this->expectExceptionMessage( '\'factory\' did not return an object' );
 		ObjectFactory::getObjectFromSpec( [
 			'factory' => function () {
@@ -191,7 +195,7 @@ class ObjectFactoryTest extends \PHPUnit\Framework\TestCase {
 	}
 
 	public function testWrongObjectFactory() {
-		$this->expectException( \UnexpectedValueException::class );
+		$this->expectException( UnexpectedValueException::class );
 		$this->expectExceptionMessage( '\'factory\' was expected to return an instance of' );
 		ObjectFactory::getObjectFromSpec( [
 			'class' => ObjectFactoryTestFixture::class,
@@ -216,7 +220,7 @@ class ObjectFactoryTest extends \PHPUnit\Framework\TestCase {
 		], [ 'assertClass' => ObjectFactoryTestFixture::class ] );
 
 		// This one fails
-		$this->expectException( \UnexpectedValueException::class );
+		$this->expectException( UnexpectedValueException::class );
 		$this->expectExceptionMessage( 'Expected instance of FooBar, got' );
 		ObjectFactory::getObjectFromSpec( [
 			'class' => ObjectFactoryTestFixture::class,
@@ -224,7 +228,7 @@ class ObjectFactoryTest extends \PHPUnit\Framework\TestCase {
 	}
 
 	public function testClassSpecNotAllowed() {
-		$this->expectException( \InvalidArgumentException::class );
+		$this->expectException( InvalidArgumentException::class );
 		$this->expectExceptionMessage( 'Passing a raw class name is not allowed here' );
 		ObjectFactory::getObjectFromSpec(
 			ObjectFactoryTestFixture::class,
@@ -241,7 +245,7 @@ class ObjectFactoryTest extends \PHPUnit\Framework\TestCase {
 	}
 
 	public function testCallableSpecNotAllowed() {
-		$this->expectException( \InvalidArgumentException::class );
+		$this->expectException( InvalidArgumentException::class );
 		$this->expectExceptionMessage( 'Passing a raw callable is not allowed here' );
 		ObjectFactory::getObjectFromSpec(
 			function ( ...$args ) {
@@ -262,7 +266,7 @@ class ObjectFactoryTest extends \PHPUnit\Framework\TestCase {
 	}
 
 	public function testBadSpec() {
-		$this->expectException( \InvalidArgumentException::class );
+		$this->expectException( InvalidArgumentException::class );
 		$this->expectExceptionMessage( 'Provided specification is not an array.' );
 		ObjectFactory::getObjectFromSpec(
 			'ThisDoesNotExist',
@@ -282,7 +286,7 @@ class ObjectFactoryTest extends \PHPUnit\Framework\TestCase {
 			if ( isset( $services[$name] ) ) {
 				return $services[$name];
 			}
-			throw new \Exception( "Service $name not found" );
+			throw new Exception( "Service $name not found" );
 		} );
 		$container->method( 'has' )->willReturnCallback( function ( $name ) use ( $services ) {
 			return isset( $services[$name] );
@@ -385,7 +389,7 @@ class ObjectFactoryTest extends \PHPUnit\Framework\TestCase {
 	 * @param string $type either 'services' or 'optional_services'
 	 */
 	public function testServices_error( $type ) {
-		$this->expectException( \InvalidArgumentException::class );
+		$this->expectException( InvalidArgumentException::class );
 		$this->expectExceptionMessage(
 			'\'services\' and \'optional_services\' cannot be used without a service container'
 		);
