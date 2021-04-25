@@ -1,5 +1,9 @@
 # Release History
 
+## v3.0.2
+* Fix @covers (Reedy)
+* Try and fix PSR-4 namespace loading issues (Reedy)
+
 ## v3.0.1
 * Move under new Wikimedia\ObjectFactory namespace (DannyS712)
 * Bump psr/container from 1.0.0 to 1.1.1 (Reedy)
