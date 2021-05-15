@@ -37,13 +37,13 @@ class ObjectFactoryTest extends TestCase {
 		$obj = ObjectFactory::getObjectFromSpec( [
 			'class' => ObjectFactoryTestFixture::class,
 			'args' => [
-				function () {
+				static function () {
 					return 'wrapped';
 				},
 				'unwrapped',
 			],
 			'calls' => [
-				'setter' => [ function () {
+				'setter' => [ static function () {
 					return 'wrapped';
 				}, ],
 			],
@@ -60,13 +60,13 @@ class ObjectFactoryTest extends TestCase {
 		$obj = ObjectFactory::getObjectFromSpec( [
 			'class' => ObjectFactoryTestFixture::class,
 			'args' => [
-				function () {
+				static function () {
 					return 'wrapped';
 				},
 				'unwrapped',
 			],
 			'calls' => [
-				'setter' => [ function () {
+				'setter' => [ static function () {
 					return 'wrapped';
 				}, ],
 			],
@@ -80,11 +80,11 @@ class ObjectFactoryTest extends TestCase {
 
 		$obj = ObjectFactory::getObjectFromSpec( [
 			'class' => ObjectFactoryTestFixture::class,
-			'args' => [ function () {
+			'args' => [ static function () {
 				return 'unwrapped';
 			}, ],
 			'calls' => [
-				'setter' => [ function () {
+				'setter' => [ static function () {
 					return 'unwrapped';
 				}, ],
 			],
@@ -124,7 +124,7 @@ class ObjectFactoryTest extends TestCase {
 	public function testGetObjectFromFactory() {
 		$args = [ 'a', 'b' ];
 		$obj = ObjectFactory::getObjectFromSpec( [
-			'factory' => function ( $a, $b ) {
+			'factory' => static function ( $a, $b ) {
 				return new ObjectFactoryTestFixture( $a, $b );
 			},
 			'args' => $args,
@@ -188,7 +188,7 @@ class ObjectFactoryTest extends TestCase {
 		$this->expectException( UnexpectedValueException::class );
 		$this->expectExceptionMessage( '\'factory\' did not return an object' );
 		ObjectFactory::getObjectFromSpec( [
-			'factory' => function () {
+			'factory' => static function () {
 				return null;
 			},
 		] );
@@ -199,7 +199,7 @@ class ObjectFactoryTest extends TestCase {
 		$this->expectExceptionMessage( '\'factory\' was expected to return an instance of' );
 		ObjectFactory::getObjectFromSpec( [
 			'class' => ObjectFactoryTestFixture::class,
-			'factory' => function () {
+			'factory' => static function () {
 				return new \stdClass;
 			},
 		] );
@@ -248,7 +248,7 @@ class ObjectFactoryTest extends TestCase {
 		$this->expectException( InvalidArgumentException::class );
 		$this->expectExceptionMessage( 'Passing a raw callable is not allowed here' );
 		ObjectFactory::getObjectFromSpec(
-			function ( ...$args ) {
+			static function ( ...$args ) {
 				return new ObjectFactoryTestFixture( ...$args );
 			},
 			[ 'extraArgs' => [ 'foo', 'bar' ] ]
@@ -257,7 +257,7 @@ class ObjectFactoryTest extends TestCase {
 
 	public function testCallableSpecAllowed() {
 		$obj = ObjectFactory::getObjectFromSpec(
-			function ( ...$args ) {
+			static function ( ...$args ) {
 				return new ObjectFactoryTestFixture( ...$args );
 			},
 			[ 'allowCallable' => true, 'extraArgs' => [ 'foo', 'bar' ] ]
@@ -282,13 +282,13 @@ class ObjectFactoryTest extends TestCase {
 		];
 
 		$container = $this->createMock( ContainerInterface::class );
-		$container->method( 'get' )->willReturnCallback( function ( $name ) use ( $services ) {
+		$container->method( 'get' )->willReturnCallback( static function ( $name ) use ( $services ) {
 			if ( isset( $services[$name] ) ) {
 				return $services[$name];
 			}
 			throw new Exception( "Service $name not found" );
 		} );
-		$container->method( 'has' )->willReturnCallback( function ( $name ) use ( $services ) {
+		$container->method( 'has' )->willReturnCallback( static function ( $name ) use ( $services ) {
 			return isset( $services[$name] );
 		} );
 
@@ -320,7 +320,7 @@ class ObjectFactoryTest extends TestCase {
 
 		// Repetition of a service
 		$spec = [
-			'factory' => function ( ...$args ) {
+			'factory' => static function ( ...$args ) {
 				return new ObjectFactoryTestFixture( ...$args );
 			},
 			'spec_is_arg' => true,

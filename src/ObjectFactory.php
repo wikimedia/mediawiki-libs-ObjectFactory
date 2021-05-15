@@ -308,7 +308,7 @@ class ObjectFactory {
 	 * @return array List with any Closures replaced with their output
 	 */
 	protected static function expandClosures( $list ) {
-		return array_map( function ( $value ) {
+		return array_map( static function ( $value ) {
 			if ( is_object( $value ) && $value instanceof Closure ) {
 				// If $value is a Closure, call it.
 				return $value();
