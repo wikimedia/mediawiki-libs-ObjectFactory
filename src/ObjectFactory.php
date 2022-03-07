@@ -147,6 +147,8 @@ class ObjectFactory {
 	 */
 	public function createObject( $spec, array $options = [] ) {
 		$options['serviceContainer'] = $this->serviceContainer;
+		// ObjectFactory::getObjectFromSpec accepts an array, not just a callable (phan bug)
+		// @phan-suppress-next-line PhanTypeInvalidCallableArraySize
 		return static::getObjectFromSpec( $spec, $options );
 	}
 
@@ -233,6 +235,7 @@ class ObjectFactory {
 			if ( !is_object( $obj ) ) {
 				throw new UnexpectedValueException( '\'factory\' did not return an object' );
 			}
+			// @phan-suppress-next-line PhanRedundantCondition
 			if ( isset( $spec['class'] ) && !$obj instanceof $spec['class'] ) {
 				throw new UnexpectedValueException(
 					'\'factory\' was expected to return an instance of ' . $spec['class']
@@ -248,6 +251,7 @@ class ObjectFactory {
 			);
 		}
 
+		// @phan-suppress-next-line PhanRedundantCondition
 		if ( isset( $options['assertClass'] ) && !$obj instanceof $options['assertClass'] ) {
 			throw new UnexpectedValueException(
 				'Expected instance of ' . $options['assertClass'] . ', got ' . get_class( $obj )
