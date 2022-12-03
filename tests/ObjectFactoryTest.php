@@ -104,13 +104,14 @@ class ObjectFactoryTest extends TestCase {
 		$obj = ObjectFactory::getObjectFromSpec( $spec );
 		$this->assertSame( [ $spec ], $obj->args );
 
-		$opts = [ 'specIsArg' => true, 'extraArgs' => [ 'foo', 'bar' ] ];
+		// spec_is_arg defaults to false
+		$opts = [ 'extraArgs' => [ 'foo', 'bar' ] ];
 		$spec = [
 			'class' => ObjectFactoryTestFixture::class,
 			'args' => [ 'a', 'b' ],
 		];
 		$obj = ObjectFactory::getObjectFromSpec( $spec, $opts );
-		$this->assertSame( [ 'foo', 'bar', $spec + [ 'spec_is_arg' => true ] ], $obj->args );
+		$this->assertSame( [ 'foo', 'bar', 'a', 'b' ], $obj->args );
 
 		$spec = [
 			'class' => ObjectFactoryTestFixture::class,
