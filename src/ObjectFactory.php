@@ -84,7 +84,7 @@ use UnexpectedValueException;
 class ObjectFactory {
 
 	/** @var ContainerInterface Service container */
-	protected $serviceContainer;
+	protected ContainerInterface $serviceContainer;
 
 	/**
 	 * @param ContainerInterface $serviceContainer Service container
@@ -273,7 +273,7 @@ class ObjectFactory {
 	 * @throws InvalidArgumentException when object specification does not
 	 *  contain 'class' or 'factory' keys
 	 */
-	protected static function validateSpec( $spec, array $options ) {
+	protected static function validateSpec( $spec, array $options ): array {
 		if ( is_callable( $spec ) ) {
 			if ( empty( $options['allowCallable'] ) ) {
 				throw new InvalidArgumentException(
@@ -302,16 +302,17 @@ class ObjectFactory {
 	 * Iterate a list and call any closures it contains.
 	 *
 	 * @param array $list List of things
+	 *
 	 * @return array List with any Closures replaced with their output
 	 */
-	protected static function expandClosures( $list ) {
+	protected static function expandClosures( array $list ): array {
 		return array_map( static function ( $value ) {
-			if ( is_object( $value ) && $value instanceof Closure ) {
+			if ( $value instanceof Closure ) {
 				// If $value is a Closure, call it.
 				return $value();
-			} else {
-				return $value;
 			}
+
+			return $value;
 		}, $list );
 	}
 

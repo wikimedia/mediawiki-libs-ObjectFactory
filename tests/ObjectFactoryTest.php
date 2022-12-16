@@ -146,7 +146,6 @@ class ObjectFactoryTest extends TestCase {
 	}
 
 	/**
-	 * @covers \Wikimedia\ObjectFactory\ObjectFactory::getObjectFromSpec
 	 * @dataProvider provideConstructClassInstance
 	 */
 	public function testGetObjectFromClass( $args ) {
