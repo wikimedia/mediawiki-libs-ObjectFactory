@@ -395,7 +395,7 @@ class ObjectFactoryTest extends TestCase {
 			'\'services\' and \'optional_services\' cannot be used without a service container'
 		);
 
-		$spec = [ 'class' => ObjectFactoryTestFixure::class ];
+		$spec = [ 'class' => ObjectFactoryTestFixture::class ];
 		$spec[ $type ] = [ 'foo', 'bar' ];
 		ObjectFactory::getObjectFromSpec( $spec );
 	}
