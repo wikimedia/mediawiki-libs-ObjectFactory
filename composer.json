@@ -24,7 +24,7 @@
 		"psr/container": "~1.1.1 || ~2.0.2"
 	},
 	"require-dev": {
-		"mediawiki/mediawiki-codesniffer": "41.0.0",
+		"mediawiki/mediawiki-codesniffer": "43.0.0",
 		"mediawiki/mediawiki-phan-config": "0.14.0",
 		"mediawiki/minus-x": "1.1.1",
 		"ockcyp/covers-validator": "1.6.0",
@@ -48,5 +48,10 @@
 		],
 		"phan": "phan --allow-polyfill-parser",
 		"phpcs": "phpcs -sp"
+	},
+	"config": {
+		"allow-plugins": {
+			"dealerdirect/phpcodesniffer-composer-installer": true
+		}
 	}
 }

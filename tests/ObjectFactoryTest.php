@@ -270,7 +270,7 @@ class ObjectFactoryTest extends TestCase {
 		$this->expectExceptionMessage( 'Provided specification is not an array.' );
 		ObjectFactory::getObjectFromSpec(
 			'ThisDoesNotExist',
-			[ 'allowClassName' => true,  'allowCallable' => true ]
+			[ 'allowClassName' => true, 'allowCallable' => true ]
 		);
 	}
 
