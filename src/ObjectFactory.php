@@ -257,7 +257,7 @@ class ObjectFactory {
 				if ( $expandArgs ) {
 					$margs = static::expandClosures( $margs );
 				}
-				call_user_func_array( [ $obj, $method ], $margs );
+				$obj->$method( ...$margs );
 			}
 		}
 
