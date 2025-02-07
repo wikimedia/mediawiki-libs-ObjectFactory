@@ -31,14 +31,18 @@ class ObjectFactoryTestFixture {
 	 */
 	public $setterArgs;
 
-	public function __construct() {
-		$this->args = func_get_args();
+	/**
+	 * @param mixed ...$args
+	 */
+	public function __construct( ...$args ) {
+		$this->args = $args;
 	}
 
 	/**
 	 * Dependency injection setter stub.
+	 * @param mixed ...$setterArgs
 	 */
-	public function setter() {
-		$this->setterArgs = func_get_args();
+	public function setter( ...$setterArgs ) {
+		$this->setterArgs = $setterArgs;
 	}
 }
