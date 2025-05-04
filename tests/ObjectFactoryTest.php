@@ -399,7 +399,7 @@ class ObjectFactoryTest extends TestCase {
 		ObjectFactory::getObjectFromSpec( $spec );
 	}
 
-	public function provideTestMissingServiceContainer() {
+	public static function provideTestMissingServiceContainer() {
 		return [
 			'Normal required services' => [ 'services' ],
 			'Optional services' => [ 'optional_services' ],
