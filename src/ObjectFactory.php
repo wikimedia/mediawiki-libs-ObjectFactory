@@ -167,7 +167,7 @@ class ObjectFactory {
 			$args = $spec['args'] ?? [];
 
 			// $args should be a non-associative array; show nice error if that's not the case
-			if ( $args && array_keys( $args ) !== range( 0, count( $args ) - 1 ) ) {
+			if ( !array_is_list( $args ) ) {
 				throw new InvalidArgumentException( '\'args\' cannot be an associative array' );
 			}
 
