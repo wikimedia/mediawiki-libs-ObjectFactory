@@ -85,16 +85,12 @@ class ObjectFactory {
 	 * This calls getObjectFromSpec(), with the ContainerInterface that was
 	 * passed to the constructor passed as `$options['serviceContainer']`.
 	 *
-	 * @phan-template T
-	 * @phpcs:disable Generic.Files.LineLength
-	 * @phan-param class-string<T>|callable(mixed ...$args):T|array{class?:class-string<T>,factory?:callable(mixed ...$args):T,args?:array,services?:array<string|null>,optional_services?:array<string|null>,calls?:string[],closure_expansion?:bool,spec_is_arg?:bool} $spec
-	 * @phan-param array{allowClassName?:bool,allowCallable?:bool,extraArgs?:array,assertClass?:class-string<T>} $options
-	 * @phpcs:enable
-	 * @phan-return T|object
+	 * @template T of object
 	 *
-	 * @param array|string|callable $spec Specification array, or (when the respective
-	 *   $options flag is set) a class name or callable. Allowed fields (see class
-	 *   documentation for more details):
+	 * @phpcs:ignore Generic.Files.LineLength
+	 * @param class-string<T>|callable(mixed ...$args):T|array{class?:class-string<T>,factory?:callable(mixed ...$args):T,args?:array,services?:array<string|null>,optional_services?:array<string|null>,calls?:string[],closure_expansion?:bool,spec_is_arg?:bool} $spec
+	 *   Specification array, or (when the respective $options flag is set) a class name or callable. Allowed fields
+	 *   (see class documentation for more details):
 	 *   - 'class': (string) Class of the object to create. If 'factory' is also specified,
 	 *     it will be used to validate the object.
 	 *   - 'factory': (callable) Factory method for creating the object.
@@ -114,7 +110,8 @@ class ObjectFactory {
 	 *   - 'spec_is_arg': (bool, default false) When true, 'args' is ignored and the entire
 	 *     specification array is passed as an argument.
 	 *   One of 'class' and 'factory' is required.
-	 * @param array $options Allowed keys are
+	 * @param array{allowClassName?:bool,allowCallable?:bool,extraArgs?:array,assertClass?:class-string<T>} $options
+	 *  Allowed keys are:
 	 *  - 'allowClassName': (bool) If set and truthy, $spec may be a string class name.
 	 *    In this case, it will be treated as if it were `[ 'class' => $spec ]`.
 	 *  - 'allowCallable': (bool) If set and truthy, $spec may be a callable. In this
@@ -123,7 +120,7 @@ class ObjectFactory {
 	 *    will come before services and normal args.
 	 *  - 'assertClass': (string) Throw an UnexpectedValueException if the spec
 	 *    does not create an object of this class.
-	 * @return object
+	 * @return T
 	 * @throws InvalidArgumentException when object specification is not valid.
 	 * @throws UnexpectedValueException when the factory returns a non-object, or
 	 *  the object is not an instance of the specified class.
@@ -136,18 +133,17 @@ class ObjectFactory {
 	/**
 	 * Instantiate an object based on a specification array.
 	 *
-	 * @phan-template T
-	 * @phpcs:disable Generic.Files.LineLength
-	 * @phan-param class-string<T>|callable(mixed ...$args):T|array{class?:class-string<T>,factory?:callable(mixed ...$args):T,args?:array,services?:array<string|null>,optional_services?:array<string|null>,calls?:string[],closure_expansion?:bool,spec_is_arg?:bool} $spec
-	 * @phan-param array{allowClassName?:bool,allowCallable?:bool,extraArgs?:array,assertClass?:class-string<T>,serviceContainer?:ContainerInterface} $options
-	 * @phpcs:enable
-	 * @phan-return T|object
+	 * @template T of object
 	 *
-	 * @param array|string|callable $spec As for createObject().
-	 * @param array $options As for createObject(). Additionally:
+	 * @phpcs:disable Generic.Files.LineLength
+	 * @param class-string<T>|callable(mixed ...$args):T|array{class?:class-string<T>,factory?:callable(mixed ...$args):T,args?:array,services?:array<string|null>,optional_services?:array<string|null>,calls?:string[],closure_expansion?:bool,spec_is_arg?:bool} $spec
+	 *  As for createObject().
+	 * @param array{allowClassName?:bool,allowCallable?:bool,extraArgs?:array,assertClass?:class-string<T>,serviceContainer?:ContainerInterface} $options
+	 *  As for createObject(). Additionally:
 	 *  - 'serviceContainer': (ContainerInterface) PSR-11 service container to use
 	 *    to handle 'services'.
-	 * @return object
+	 * @phpcs:enable
+	 * @return T
 	 * @throws InvalidArgumentException when object specification is not valid.
 	 * @throws InvalidArgumentException when $spec['services'] or $spec['optional_services']
 	 *  is used without $options['serviceContainer'] being set and implementing ContainerInterface.
