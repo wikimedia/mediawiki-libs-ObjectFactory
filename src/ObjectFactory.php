@@ -130,8 +130,6 @@ class ObjectFactory {
 	 */
 	public function createObject( $spec, array $options = [] ) {
 		$options['serviceContainer'] = $this->serviceContainer;
-		// ObjectFactory::getObjectFromSpec accepts an array, not just a callable (phan bug)
-		// @phan-suppress-next-line PhanTypeInvalidCallableArraySize
 		return static::getObjectFromSpec( $spec, $options );
 	}
 
