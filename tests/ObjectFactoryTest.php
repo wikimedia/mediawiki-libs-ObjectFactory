@@ -165,10 +165,21 @@ class ObjectFactoryTest extends TestCase {
 	public function testNamedArgs() {
 		$args = [ 'foo' => 1, 'bar' => 2, 'baz' => 3 ];
 		$this->expectException( InvalidArgumentException::class );
-		$this->expectExceptionMessage( '\'args\' cannot be an associative array' );
+		$this->expectExceptionMessage( '\'args\' must be a list' );
 		ObjectFactory::getObjectFromSpec( [
 			'class' => ObjectFactoryTestFixture::class,
 			'args' => $args,
+		] );
+	}
+
+	public function testNamedExtraArgs() {
+		$extraArgs = [ 'foo' => 1, 'bar' => 2, 'baz' => 3 ];
+		$this->expectException( InvalidArgumentException::class );
+		$this->expectExceptionMessage( '\'extraArgs\' must be a list' );
+		ObjectFactory::getObjectFromSpec( [
+			'class' => ObjectFactoryTestFixture::class,
+		], [
+			'extraArgs' => $extraArgs,
 		] );
 	}
 
